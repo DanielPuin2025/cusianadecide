@@ -322,6 +322,24 @@ body {
   box-shadow: var(--sombra-sm);
 }
 
+.header-acceso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.logo-sena-acceso {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px;
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-sm);
+}
+
 .logo-cusiana-acceso {
   width: 100px;
   height: 100px;

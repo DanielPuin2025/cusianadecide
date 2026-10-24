@@ -2,6 +2,20 @@
 const COLORES = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626", "#7c3aed", "#0891b2"];
 const MEDALLAS = ["🥇", "🥈", "🥉"];
 
+// Si el servidor rechaza el token del administrador, se cierra la sesión local y se pide ingresar de nuevo
+const fetchOriginal = window.fetch.bind(window);
+window.fetch = async (...args) => {
+  const respuesta = await fetchOriginal(...args);
+  const headers = args[1]?.headers || {};
+  if (respuesta.status === 401 && headers.Authorization && !window.__sesionCaducada) {
+    window.__sesionCaducada = true;
+    try { await eliminarDeStore("sesion", "actual"); } catch {}
+    window.alert("Tu sesión de administrador expiró. Ingresa nuevamente.");
+    window.location.href = "index.html";
+  }
+  return respuesta;
+};
+
 function escaparHtml(texto) {
   const mapa = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   return String(texto ?? "").replace(/[&<>"']/g, (caracter) => mapa[caracter] || caracter);

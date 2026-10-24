@@ -10,8 +10,7 @@ const router = express.Router();
 
 const EXCEL_PATH = path.join(__dirname, "..", "data", "estudiantes.xlsx");
 const JSON_PATH = path.join(__dirname, "..", "data", "estudiantes.json");
-const sesiones = new Map();
-const ADMIN_CODE = "202616";
+const ADMIN_CODE = process.env.ADMIN_CODE || "202616";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -22,6 +21,7 @@ const RATE_LIMIT_MAX = 10; // máximo 10 intentos por minuto
 
 // Sesiones con expiración (30 minutos)
 const SESION_EXPIRACION = 30 * 60 * 1000;
+const SESION_ADMIN_EXPIRACION = 12 * 60 * 60 * 1000;
 
 function verificarRateLimit(ip) {
   const ahora = Date.now();
@@ -45,17 +45,6 @@ function verificarRateLimit(ip) {
   return true;
 }
 
-function limpiarSesionesExpiradas() {
-  const ahora = Date.now();
-  for (const [token, sesion] of sesiones.entries()) {
-    if (ahora - sesion.creadoEn > SESION_EXPIRACION) {
-      sesiones.delete(token);
-    }
-  }
-}
-
-// Limpiar sesiones expiradas cada 5 minutos
-setInterval(limpiarSesionesExpiradas, 5 * 60 * 1000);
 
 function normalizarTexto(valor) {
   return String(valor ?? "")
@@ -117,22 +106,60 @@ async function validarCodigo(codigo) {
   };
 }
 
+// Tokens firmados (HMAC): siguen siendo válidos tras reiniciar o redesplegar el servidor.
+function obtenerSecretoSesion() {
+  if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET;
+  const ruta = path.join(__dirname, "..", "data", ".session-secret");
+  try {
+    return fs.readFileSync(ruta, "utf8").trim();
+  } catch {
+    const nuevo = crypto.randomBytes(32).toString("hex");
+    try {
+      fs.mkdirSync(path.dirname(ruta), { recursive: true });
+      fs.writeFileSync(ruta, nuevo, { mode: 0o600 });
+    } catch {
+      // Sin disco escribible el secreto vive solo en memoria
+    }
+    return nuevo;
+  }
+}
+
+const SECRETO_SESION = obtenerSecretoSesion();
+const revocados = new Set();
+
+function firmar(cuerpo) {
+  return crypto.createHmac("sha256", SECRETO_SESION).update(cuerpo).digest("base64url");
+}
+
 function crearSesion(datos) {
-  const token = crypto.randomBytes(32).toString("hex");
-  sesiones.set(token, { ...datos, creadoEn: Date.now() });
-  return token;
+  const cuerpo = Buffer.from(JSON.stringify({ ...datos, creadoEn: Date.now() })).toString("base64url");
+  return `${cuerpo}.${firmar(cuerpo)}`;
+}
+
+function leerSesion(token) {
+  if (!token || revocados.has(token)) return null;
+  const [cuerpo, firma] = String(token).split(".");
+  if (!cuerpo || !firma) return null;
+  const esperada = firmar(cuerpo);
+  const a = Buffer.from(firma);
+  const b = Buffer.from(esperada);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try {
+    return JSON.parse(Buffer.from(cuerpo, "base64url").toString("utf8"));
+  } catch {
+    return null;
+  }
 }
 
 function requerirRol(rol) {
   return (req, res, next) => {
     const token = req.get("Authorization")?.replace(/^Bearer\s+/i, "");
-    const sesion = token && sesiones.get(token);
+    const sesion = leerSesion(token);
     if (!sesion || sesion.rol !== rol) {
       return res.status(401).json({ ok: false, motivo: "No autorizado" });
     }
-    // Verificar expiración de sesión
-    if (Date.now() - sesion.creadoEn > SESION_EXPIRACION) {
-      sesiones.delete(token);
+    const limite = sesion.rol === "admin" ? SESION_ADMIN_EXPIRACION : SESION_EXPIRACION;
+    if (Date.now() - sesion.creadoEn > limite) {
       return res.status(401).json({ ok: false, motivo: "Sesión expirada. Vuelve a iniciar sesión." });
     }
     req.usuario = sesion;
@@ -203,7 +230,7 @@ router.post("/validar", rateLimiter, async (req, res) => {
 
 router.post("/logout", (req, res) => {
   const token = req.get("Authorization")?.replace(/^Bearer\s+/i, "");
-  if (token) sesiones.delete(token);
+  if (token) revocados.add(token);
   res.json({ ok: true });
 });
 

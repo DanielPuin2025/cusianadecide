@@ -12,6 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mensaje) mensaje.textContent = "";
   });
 
+  const modalCreadores = document.getElementById("modalCreadores");
+  document.getElementById("btnVerCreadores")?.addEventListener("click", () => {
+    if (modalCreadores) modalCreadores.hidden = false;
+  });
+  const cerrarCreadores = () => { if (modalCreadores) modalCreadores.hidden = true; };
+  document.getElementById("btnCerrarCreadores")?.addEventListener("click", cerrarCreadores);
+  modalCreadores?.addEventListener("click", (e) => { if (e.target === modalCreadores) cerrarCreadores(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarCreadores(); });
+
   form?.addEventListener("submit", async (evento) => {
     evento.preventDefault();
     const codigo = document.getElementById("codigo").value.trim();

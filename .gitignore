@@ -1,0 +1,46 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Datos sensibles y temporales
+backend/data/*.json
+backend/data/*.xlsx
+backend/data/*.xls
+backend/data/*.csv
+!backend/data/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales
+*.tmp
+*.bak
+*.cache
+
+# PM2
+.pm2/
+
+# Kilo (ya existe en .kilo/)
+.kilo/
+
+# Claude
+.claude/

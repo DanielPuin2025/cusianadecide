@@ -1,0 +1,16 @@
+{
+  "name": "Votaciones Estudiantiles",
+  "short_name": "Votaciones",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#2563eb",
+  "description": "Aplicación de votaciones estudiantiles con soporte para uso sin internet",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

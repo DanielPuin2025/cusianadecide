@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultados en Vivo - Votaciones Cusiana Decide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512x512.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+  <link rel="stylesheet" href="css/estilos.css?v=15" />
+  <style>
+    #listaResultados {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="contenedor">
+    <header class="encabezado encabezado-institucional">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <img src="icons/logo institucional.png" alt="Logo Institución" class="logo-institucional" />
+        <div>
+          <h1 style="margin: 0;">Resultados en Vivo</h1>
+          <p style="margin: 0; color: var(--texto-secundario);">Votaciones Estudiantiles 2026</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span id="estadoVotacionesBadge" class="badge badge-abierto">Votaciones abiertas</span>
+        <span id="estadoConexion" class="badge">Verificando...</span>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-numero" id="totalVotos">0</div>
+        <div class="stat-label">Votos Totales</div>
+      </div>
+      <div class="stat-card stat-secundario">
+        <div class="stat-numero" id="totalCandidatos">0</div>
+        <div class="stat-label">Candidatos</div>
+      </div>
+      <div class="stat-card stat-exito">
+        <div class="stat-numero" id="participacion">0%</div>
+        <div class="stat-label">Participación</div>
+      </div>
+      <div class="stat-card stat-acento">
+        <div class="stat-numero" id="ultimaActualizacion">--:--</div>
+        <div class="stat-label">Última Actualización</div>
+      </div>
+    </div>
+
+    <div class="contenedor-grafica-control">
+      <div class="bloque-grafica-inferior">
+        <div class="seccion-grafica">
+          <h3 style="color: var(--texto-primary); margin: 0;">Distribución de Votos</h3>
+          <div id="seccionGrafica">
+            <div class="empty-state">
+              <div class="empty-state-icon">📊</div>
+              <div class="empty-state-text">Cargando gráfica...</div>
+            </div>
+          </div>
+        </div>
+        <div class="detalle-resultados" id="detalleResultados">
+          <div class="detalle-box">
+            <div class="detalle-titulo">Total votos</div>
+            <div class="detalle-valor" id="totalVotosBox">0</div>
+          </div>
+          <div class="detalle-box">
+            <div class="detalle-titulo">Porcentajes</div>
+            <div class="detalle-valor" id="porcentajesBox">—</div>
+          </div>
+          <div class="detalle-box">
+            <div class="detalle-titulo">Votos por candidato</div>
+            <div class="detalle-valor" id="votosCandidatoBox">—</div>
+          </div>
+          <div class="detalle-box">
+            <div class="detalle-titulo">Quién va ganando</div>
+            <div class="detalle-valor" id="ganadorBox">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-detalle-resultados">
+        <h3 style="margin: 0 0 12px; color: var(--texto-primary); font-size: 1rem;">🏆 Clasificación</h3>
+        <div id="listaResultados">
+          <div class="empty-state">
+            <div class="empty-state-icon">⏳</div>
+            <div class="empty-state-text">Cargando resultados...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align: center; color: var(--texto-secundario); margin-top: 24px; font-size: 0.9rem;">
+      Los resultados se actualizan automáticamente cada 10 segundos
+    </p>
+  </div>
+
+  <script src="js/db.js?v=8"></script>
+  <script src="js/estado-conexion.js?v=8"></script>
+  <script src="js/mejoras.js?v=1"></script>
+  <script>
+    const COLORES = ["#0d9488", "#7c3aed", "#f59e0b", "#ef4444", "#10b981", "#3b82f6"];
+    let resultadosCache = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarEstado();
+      cargarResultados();
+      setInterval(cargarEstado, 10000);
+      setInterval(cargarResultados, 10000);
+    });
+
+    async function cargarEstado() {
+      try {
+        const resp = await fetch("/api/estado");
+        const data = await resp.json();
+        const badge = document.getElementById("estadoVotacionesBadge");
+        if (data.abierto) {
+          badge.textContent = "Votaciones abiertas";
+          badge.className = "badge badge-abierto";
+        } else {
+          badge.textContent = "Votaciones cerradas";
+          badge.className = "badge badge-cerrado";
+        }
+      } catch (e) {
+        console.error("Error cargando estado:", e);
+      }
+    }
+
+    async function cargarResultados() {
+      try {
+        const resp = await fetch("/api/votos/resultados-publico");
+        if (!resp.ok) return;
+        const resultados = await resp.json();
+        resultadosCache = resultados;
+        renderizarResultados(resultados);
+        actualizarEstadisticas(resultados);
+        document.getElementById("ultimaActualizacion").textContent = new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+      } catch (e) {
+        console.error("Error cargando resultados:", e);
+        const lista = document.getElementById("listaResultados");
+        if (lista && resultadosCache.length === 0) {
+          lista.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📊</div>
+              <div class="empty-state-text">Esperando resultados...</div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function renderizarResultados(resultados) {
+      const lista = document.getElementById("listaResultados");
+      if (!lista) return;
+
+      if (!resultados.length) {
+        lista.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🗳️</div>
+            <div class="empty-state-text">Aún no hay votos registrados</div>
+          </div>
+        `;
+        return;
+      }
+
+      const ordenados = [...resultados].sort((a, b) => {
+        if (a.nombre === "Voto en blanco") return 1;
+        if (b.nombre === "Voto en blanco") return -1;
+        return (b.votos || 0) - (a.votos || 0);
+      });
+      const totalVotos = resultados.reduce((sum, r) => sum + (r.votos || 0), 0);
+      const medallas = ["🥇", "🥈", "🥉"];
+
+      lista.innerHTML = ordenados.map((candidato, i) => {
+        const votos = candidato.votos || 0;
+        const porcentaje = totalVotos ? Math.round((votos / totalVotos) * 100) : 0;
+        const color = COLORES[i % COLORES.length];
+        const medalla = votos > 0 ? medallas[i] || "" : "";
+        const esVotoEnBlanco = candidato.nombre.toLowerCase() === "voto en blanco";
+        const nombreMostrar = esVotoEnBlanco ? "VOTO EN BLANCO" : candidato.nombre.toUpperCase();
+
+        return `
+          <div class="tarjeta-resultado" style="margin-bottom: 12px; border-left-color: ${color}">
+            <div class="resultado-fila">
+              <span class="resultado-nombre">
+                <span class="medalla">${medalla}</span>
+                ${nombreMostrar}
+              </span>
+              <span class="resultado-porcentaje" style="color: ${color}">${porcentaje}%</span>
+            </div>
+            <p class="resultado-votos">${votos} voto${votos === 1 ? "" : "s"}</p>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: ${porcentaje}%"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function actualizarEstadisticas(resultados) {
+      const totalVotos = resultados.reduce((sum, r) => sum + (r.votos || 0), 0);
+      animarConteo(document.getElementById("totalVotos"), totalVotos);
+      document.getElementById("totalCandidatos").textContent = resultados.length;
+      document.getElementById("totalVotosBox").textContent = totalVotos;
+
+      if (resultados.length) {
+        const ordenados = [...resultados].sort((a, b) => {
+          if (a.nombre.toLowerCase() === "voto en blanco") return 1;
+          if (b.nombre.toLowerCase() === "voto en blanco") return -1;
+          return (b.votos || 0) - (a.votos || 0);
+        });
+        const ganador = ordenados[0];
+        const ganadorNombre = ganador.nombre.toLowerCase() === "voto en blanco" ? "VOTO EN BLANCO" : ganador.nombre.toUpperCase();
+        document.getElementById("ganadorBox").innerHTML = ganador.votos > 0 ? 
+          `<span style="color: ${COLORES[0]}; font-weight: 800;">🏆 ${ganadorNombre}</span>` : "Sin votos aún";
+
+        const porcentajesBox = document.getElementById("porcentajesBox");
+        porcentajesBox.innerHTML = ordenados.map((c, i) => {
+          const p = totalVotos ? Math.round((c.votos / totalVotos) * 100) : 0;
+          const nombreMostrar = c.nombre.toLowerCase() === "voto en blanco" ? "VOTO EN BLANCO" : c.nombre.toUpperCase();
+          return `<span style="color: ${COLORES[i % COLORES.length]}; font-weight: 800;">${nombreMostrar}: ${p}%</span>`;
+        }).join("<br/>");
+
+        const votosBox = document.getElementById("votosCandidatoBox");
+        votosBox.innerHTML = ordenados.map((c, i) => {
+          const nombreMostrar = c.nombre.toLowerCase() === "voto en blanco" ? "VOTO EN BLANCO" : c.nombre.toUpperCase();
+          return `<span style="color: ${COLORES[i % COLORES.length]}; font-weight: 800;">${nombreMostrar}</span>: ${c.votos} voto${c.votos === 1 ? "" : "s"}`;
+        }).join("<br/>");
+      }
+    }
+  </script>
+</body>
+</html>

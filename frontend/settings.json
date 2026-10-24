@@ -1,0 +1,9 @@
+{"workbench.iconTheme":"material-icon-theme",
+"window.zoomLevel":2,
+"[html]":{"editor.defaultFormatter":"esbenp.prettier-vscode"},
+"[css]":{"editor.defaultFormatter":"esbenp.prettier-vscode"},
+"[json]":{"editor.defaultFormatter":"esbenp.prettier-vscode"},
+"liveshare.settings.advanceCustomBrowserCmdline":"",
+"workbench.editorAssociations":{"*.php":"default"},
+"C__Cpp.default.configurationvariables":{},
+"php.validate.executablePath":"C:\\xampp\\php\\php.exe"}

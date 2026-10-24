@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>Votaciones Cusiana Decide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512x512.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/favicon-180x180.png" />
+  <link rel="manifest" href="manifest.json?v=6" />
+  <link rel="stylesheet" href="css/estilos.css?v=17" />
+</head>
+  <body>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if ('caches' in window) {
+          caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+        }
+        
+        const ts = Date.now();
+        const links = document.querySelectorAll('link[rel="stylesheet"]');
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          if (href && !href.includes('?')) link.setAttribute('href', href + '?ts=' + ts);
+        });
+        const scripts = document.querySelectorAll('script[src]');
+        scripts.forEach(script => {
+          const src = script.getAttribute('src');
+          if (src && !src.includes('?')) script.setAttribute('src', src + '?ts=' + ts);
+        });
+      });
+    </script>
+    
+    <!-- PANTALLA DE BIENVENIDA -->
+    <div id="pantallaBienvenida" class="pantalla-bienvenida activo">
+      <div class="hero-card">
+        <header class="header-bienvenida">
+          <img src="icons/logo institucional.png" alt="Escudo de la Institución Educativa El Cusiana" class="logo-institucional-bienvenida" />
+          <img src="icons/logo.ico" alt="Logo Cusiana Decide" class="logo-cusiana-bienvenida" />
+        </header>
+        
+        <main>
+          <h1>Bienvenido a <span class="resaltar">Cusiana Decide</span></h1>
+          <h2>Tu voz cuenta</h2>
+          <p class="subtitulo">Participa en las votaciones estudiantiles de forma fácil, segura y transparente.</p>
+          
+          <button type="button" class="boton boton-principal boton-grande" id="btnContinuar">
+            <span>INGRESAR</span>
+            <span class="icono-flecha">→</span>
+          </button>
+        </main>
+        
+        <footer class="creditos-desarrollo">
+          <p class="creditos-titulo">Equipo de desarrollo</p>
+          <p class="creditos-nombres">Dannia Beatriz Robles Pérez</p>
+          <p class="creditos-nombres">Andres Felipe Camacho Sigua</p>
+          <p class="creditos-nombres">Eileen Daniela Yaruro Amaya</p>
+        </footer>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE ACCESO (CÓDIGO ESTUDIANTIL) -->
+    <div id="pantallaAcceso" class="pantalla-acceso">
+      <div class="contenido-acceso">
+        <header class="header-acceso">
+          <img src="icons/logo institucional.png" alt="Escudo de la Institución Educativa El Cusiana" class="logo-institucional-acceso" />
+          <img src="icons/logo.ico" alt="Logo Cusiana Decide" class="logo-cusiana-acceso" />
+        </header>
+        
+        <main class="tarjeta-acceso">
+          <h1>Cusiana Decide</h1>
+          <p class="subtitulo-acceso">Ingresa tu código estudiantil para acceder a la votación</p>
+          
+          <form id="formLogin" class="formulario-acceso">
+            <div class="campo-acceso">
+              <label for="codigo">Código estudiantil</label>
+              <div class="input-wrapper">
+                <span class="icono-input">🔢</span>
+                <input 
+                  type="text" 
+                  id="codigo" 
+                  required 
+                  placeholder="Ej: 2026001" 
+                  autocomplete="off"
+                  inputmode="numeric"
+                  aria-label="Código estudiantil"
+                />
+              </div>
+            </div>
+            
+            <button type="submit" class="boton boton-principal boton-grande-acceso">
+              <span>INGRESAR</span>
+              <span class="icono-flecha">→</span>
+            </button>
+          </form>
+          
+          <p id="mensajeLogin" class="mensaje-acceso" aria-live="polite"></p>
+          
+          <button type="button" class="boton boton-secundario boton-volver" id="btnVolverBienvenida">
+            Volver
+          </button>
+        </main>
+    </div>
+
+  <script src="js/db.js?v=8"></script>
+  <script src="js/estado-conexion.js?v=8"></script>
+  <script src="js/auth.js?v=12"></script>
+  <script src="js/mejoras.js?v=1"></script>
+  <script src="js/registrar-sw.js?v=8"></script>
+</body>
+</html>

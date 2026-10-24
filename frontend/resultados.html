@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultados - Votaciones Estudiantiles</title>
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512x512.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/favicon-180x180.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/estilos.css?v=16" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <script>
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    }
+  </script>
+  <div class="contenedor panel-contenedor">
+    <header class="encabezado encabezado-institucional">
+      <div class="encabezado-principal">
+        <div class="encabezado-logos">
+          <img src="icons/logo.ico" alt="Logo Cusiana Decide" class="logo-cusiana" />
+          <img src="icons/logo institucional.png" alt="Escudo Institución Educativa El Cusiana" class="logo-institucional" />
+        </div>
+        <div class="encabezado-titulo">
+          <h1>Panel de administración</h1>
+        </div>
+        <div class="encabezado-controles">
+          <span id="estadoConexion" class="badge">Verificando conexión...</span>
+          <button type="button" class="boton-peligro btn-cerrar-sesion" id="btnCerrarSesionArriba">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <nav class="pestanas-admin" aria-label="Secciones del panel">
+        <button type="button" class="pestana-admin activa" data-pestana="votaciones">Votaciones</button>
+        <button type="button" class="pestana-admin" data-pestana="candidatos">Editar candidatos</button>
+      </nav>
+    </header>
+
+    <p class="mensaje" id="infoSincronizacion" role="status" aria-live="polite"></p>
+
+    <!-- PESTAÑA 1: VOTACIONES -->
+    <section id="seccionVotaciones" class="seccion-admin">
+      <div class="panel-grid">
+        <!-- Columna izquierda: Resultados -->
+        <div class="panel-col">
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h2 class="panel-card-title">Resultados de la votación</h2>
+            </div>
+            <div class="resumen-compacto">
+              <div class="resumen-compacto-item">
+                <span class="resumen-compacto-numero" id="totalVotosNumero">0</span>
+                <span class="resumen-compacto-etiqueta">votos totales</span>
+              </div>
+              <div class="resumen-compacto-item">
+                <span class="resumen-compacto-numero" id="totalCandidatosNumero">0</span>
+                <span class="resumen-compacto-etiqueta">candidatos</span>
+              </div>
+              <div class="resumen-compacto-item resumen-compacto-lider">
+                <span class="resumen-compacto-lider-texto" id="liderVotaciones">—</span>
+                <span class="resumen-compacto-etiqueta">candidato ganando</span>
+              </div>
+            </div>
+            <div id="seccionGrafica" class="seccion-grafica"></div>
+            <div id="listaResultados" class="lista-resultados">
+              <p>Esperando resultados...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Control + Respaldo -->
+        <div class="panel-col">
+          <!-- Control de votaciones -->
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h2 class="panel-card-title">Control de votación</h2>
+              <span id="estadoVotacionesBadge" class="badge">Votaciones abiertas</span>
+            </div>
+            <div class="config-votacion">
+              <div class="config-fila">
+                <label for="selectSede">Sede:</label>
+                <select id="selectSede" class="select-sede">
+                  <option value="__TODAS__">Todas las sedes</option>
+                  <option value="YAGUAROS">Yaguaros</option>
+                  <option value="IQUIA">Iquia</option>
+                  <option value="SAN CARLOS">San Carlos</option>
+                  <option value="SEDE CENTRAL">Sede Central</option>
+                </select>
+              </div>
+              <div class="config-fila">
+                <label for="selectGrados">Grados habilitados:</label>
+                <div id="gradosContainer" class="grados-checkboxes"></div>
+              </div>
+              <div class="config-acciones">
+                <button type="button" id="btnAplicarConfig" class="boton-exito">Aplicar configuración</button>
+                <button type="button" id="btnLimpiarConfig" class="boton secundario">Limpiar todo</button>
+              </div>
+              <p id="configResumen" class="config-resumen"></p>
+            </div>
+            <div class="card-divider"></div>
+            <div class="control-acciones">
+              <button type="button" id="btnCerrarVotaciones" class="boton-peligro">Cerrar votaciones</button>
+              <button type="button" id="btnAbrirVotaciones" class="boton-exito">Abrir votaciones</button>
+              <button type="button" id="btnReiniciar" class="boton secundario">Reiniciar votaciones</button>
+            </div>
+          </div>
+
+          <!-- Agregar estudiante -->
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h2 class="panel-card-title">Agregar estudiante</h2>
+            </div>
+            <form id="formAgregarEstudiante" class="form-admin">
+              <div class="form-row">
+                <div class="form-group form-group-wide">
+                  <label for="agNombre">Nombre completo *</label>
+                  <input type="text" id="agNombre" required maxlength="100" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="agGrado">Grado/Grupo *</label>
+                  <input type="text" id="agGrado" placeholder="Ej: SEXTO A" required maxlength="30" />
+                </div>
+                <div class="form-group">
+                  <label for="agSede">Sede *</label>
+                  <input type="text" id="agSede" placeholder="YAGUAROS" required maxlength="30" />
+                </div>
+              </div>
+              <div class="acciones-admin">
+                <button type="submit" class="boton">Agregar estudiante</button>
+              </div>
+              <p id="agMensaje" class="mensaje"></p>
+            </form>
+          </div>
+            <div class="control-acciones">
+              <button type="button" id="btnExportarVotos" class="boton secundario">Descargar registro de votaciones</button>
+              <button type="button" id="btnExportarEstudiantes" class="boton secundario">
+                <span class="icono-excel">📊</span>
+                <span>Descargar Excel estudiantes</span>
+              </button>
+              <button type="button" id="btnImportarEstudiantes" class="boton secundario">
+                <span class="icono-excel">📊</span>
+                <span>Subir Excel de estudiantes</span>
+              </button>
+              <input type="file" id="importarEstudiantesArchivo" accept=".xlsx,.xls,.csv" hidden />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 2: EDITAR CANDIDATOS -->
+    <section id="seccionCandidatos" class="seccion-admin oculto">
+      <div class="panel-grid">
+        <!-- Columna izquierda: Formulario -->
+        <div class="panel-col">
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h2 class="panel-card-title">Administrar candidatos</h2>
+            </div>
+            <form id="formCandidato" class="form-admin">
+              <input type="hidden" id="candidatoId" />
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="nombreCandidato">Nombre completo *</label>
+                  <input type="text" id="nombreCandidato" placeholder="Nombre del candidato" required maxlength="100" />
+                </div>
+                <div class="form-group">
+                  <label for="listaCandidato">Número de lista *</label>
+                  <input type="number" id="listaCandidato" placeholder="Número de lista" required min="1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cargoCandidato">Cargo *</label>
+                  <input type="text" id="cargoCandidato" placeholder="Ej.: Personero estudiantil" required maxlength="80" />
+                </div>
+                <div class="form-group">
+                  <label for="propuestaCandidato">Propuesta *</label>
+                  <input type="text" id="propuestaCandidato" placeholder="Propuesta del candidato" required maxlength="300" />
+                </div>
+              </div>
+              <div class="form-divider-seccion">
+                <h3>Foto del candidato</h3>
+                <div class="foto-unificada">
+                  <button type="button" id="btnSeleccionarFoto" class="boton secundario">
+                    <span class="icono-foto">📷</span>
+                    <span>Seleccionar foto</span>
+                  </button>
+                  <input type="file" id="imagenArchivo" accept="image/*" hidden />
+                  <input type="text" id="imagenCandidato" placeholder="O pega una URL de imagen..." hidden />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inspiracionCandidato">Inspiración (opcional)</label>
+                <input type="text" id="inspiracionCandidato" placeholder="Inspiración (opcional)" />
+              </div>
+              <div class="vista-previa-foto">
+                <img id="previewImagenCandidato" alt="Vista previa de la foto del candidato" hidden />
+                <span id="sinPreviewImagen">Sin foto seleccionada</span>
+              </div>
+              <div class="acciones-admin">
+                <button type="submit" id="btnGuardarCandidato" class="boton">Guardar</button>
+                <button type="button" id="btnLimpiarForm" class="boton secundario">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Lista de candidatos + Importar/Exportar -->
+        <div class="panel-col">
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h2 class="panel-card-title">Candidatos registrados</h2>
+            </div>
+            <div id="listaCandidatosAdmin" class="lista-candidatos-admin">
+              <p>Cargando candidatos...</p>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h2 class="panel-card-title">Importar / Exportar candidatos</h2>
+            </div>
+            <div class="control-acciones">
+              <button type="button" id="btnExportarCandidatos" class="boton secundario">Exportar candidatos</button>
+              <button type="button" id="btnImportarCandidatos" class="boton secundario">Importar candidatos</button>
+              <input type="file" id="importarCandidatosArchivo" accept=".json,.xlsx,.xls,.csv" hidden />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal para seleccionar candidatos a exportar -->
+    <div id="modalExportarCandidatos" class="modal oculto">
+      <div class="modal-contenido">
+        <h2>Exportar candidatos</h2>
+        <p>Selecciona los candidatos que deseas exportar:</p>
+        <div id="listaExportarCandidatos" class="lista-seleccion-candidatos"></div>
+        <div class="modal-botones">
+          <button id="btnCancelarExportar" class="boton-peligro">Cancelar</button>
+          <button id="btnConfirmarExportar" class="boton">Exportar seleccionados</button>
+        </div>
+      </div    </div>
+
+    <script src="js/db.js?v=9"></script>
+    <script src="js/estado-conexion.js?v=8"></script>
+    <script src="js/offline-sync.js?v=1"></script>
+    <script src="js/auth.js?v=11"></script>
+    <script src="js/resultados.js?v=13"></script>
+    <script src="js/registrar-sw.js?v=8"></script>
+  </body>
+</html>

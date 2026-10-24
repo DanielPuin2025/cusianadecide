@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votar - Votaciones Estudiantiles</title>
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512x512.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/favicon-180x180.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/estilos.css?v=11" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <script>
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    }
+  </script>
+  <div class="contenedor">
+    <header class="encabezado">
+      <button type="button" id="btnVolver" class="enlace-volver" aria-label="Volver al inicio">← Volver</button>
+      <h1>Elige tu candidato</h1>
+      <div class="header-derecha">
+        <div id="temporizadorVotacion" class="temporizador oculto" aria-live="polite">
+          <span class="icono-reloj">⏱</span>
+          <span id="tiempoRestante">02:00</span>
+        </div>
+        <span id="estadoConexion" class="badge">Verificando conexión...</span>
+      </div>
+    </header>
+
+    <div id="saludo" class="saludo-estudiante"></div>
+
+    <div id="listaCandidatos" class="lista-candidatos">
+      <p>Cargando candidatos...</p>
+    </div>
+
+    <p id="mensajeVoto" class="mensaje"></p>
+  </div>
+
+  <div id="modalConfirmacion" class="modal oculto">
+    <div class="modal-contenido">
+      <h2>Confirmar voto</h2>
+      <p id="modalTexto"></p>
+      <div class="modal-botones">
+        <button id="btnCancelar" class="boton-peligro">Cancelar</button>
+        <button id="btnConfirmar" class="boton">Confirmar voto</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/db.js?v=9"></script>
+  <script src="js/estado-conexion.js?v=8"></script>
+  <script src="js/votar.js?v=10"></script>
+  <script src="js/registrar-sw.js?v=8"></script>
+</body>
+</html>

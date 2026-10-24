@@ -8,9 +8,14 @@
   "description": "Aplicación de votaciones estudiantiles con soporte para uso sin internet",
   "icons": [
     {
-      "src": "icons/icon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml"
+      "src": "icons/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }

@@ -12,6 +12,7 @@ function resolverRutaImagen(imagen) {
 
   const valor = String(imagen).trim();
   if (!valor) return "icons/logo.ico";
+  if (/^data:image\//i.test(valor)) return valor;
   if (/^(https?:)?\/\//i.test(valor)) return valor;
 
   const normalizada = valor.replace(/^\.\//, "").replace(/^frontend\//, "");
@@ -45,6 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const botonReiniciar = document.getElementById("btnReiniciar");
   const botonesCerrarSesion = document.querySelectorAll(".btn-cerrar-sesion");
   const formCandidato = document.getElementById("formCandidato");
+  const formAgregarEstudiante = document.getElementById("formAgregarEstudiante");
   const botonLimpiar = document.getElementById("btnLimpiarForm");
   const botonExportar = document.getElementById("btnExportarCandidatos");
   const botonImportar = document.getElementById("btnImportarCandidatos");
@@ -1199,7 +1201,9 @@ function renderizarResultados(resultados) {
     // Usar imagen personalizada para Voto en blanco si existe
     let contenidoImagen;
     if (esVotoEnBlanco) {
-      const imgBlanco = "icons/candidatos/Voto-en-blanco.jpg";
+      const imgBlanco = candidato.imagen
+        ? rutaImagen
+        : "icons/candidatos/Voto-en-blanco.jpg";
       contenidoImagen = `${crearImgConFallback(imgBlanco, "VOTO EN BLANCO", "foto-candidato resultado-foto", "this.nextElementSibling.style.display='inline-flex';")}<span class="icono-voto-blanco-resultado" aria-label="VOTO EN BLANCO" style="display:none;">☐</span>`;
     } else {
       contenidoImagen = crearImgConFallback(rutaImagen, escaparHtml(nombreMostrar), "foto-candidato resultado-foto");

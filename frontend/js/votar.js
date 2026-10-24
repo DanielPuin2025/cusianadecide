@@ -184,6 +184,7 @@ function resolverRutaImagen(imagen) {
 
   const valor = String(imagen).trim();
   if (!valor) return "icons/logo.ico";
+  if (/^data:image\//i.test(valor)) return valor;
   if (/^(https?:)?\/\//i.test(valor)) return valor;
 
   const normalizada = valor.replace(/^\.\//, "").replace(/^frontend\//, "");
@@ -227,7 +228,9 @@ function renderizarCandidatos(candidatos) {
     // Usar imagen personalizada para Voto en blanco si existe, sino símbolo ☐
     let contenidoAvatar;
     if (esVotoEnBlanco) {
-      const imgBlanco = "icons/candidatos/Voto-en-blanco.jpg";
+      const imgBlanco = candidato.imagen
+        ? rutaImagen
+        : "icons/candidatos/Voto-en-blanco.jpg";
       contenidoAvatar = `${crearImgConFallback(imgBlanco, "VOTO EN BLANCO", "foto-candidato", "this.nextElementSibling.style.display='flex';")}<span class="icono-voto-blanco" aria-label="VOTO EN BLANCO" style="display:none;">☐</span>`;
     } else {
       contenidoAvatar = crearImgConFallback(rutaImagen, escaparHtml(nombreMostrar));

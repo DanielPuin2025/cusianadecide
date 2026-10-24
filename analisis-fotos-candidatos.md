@@ -1,9 +1,15 @@
 # Análisis del Sistema de Carga de Fotos de Candidatos
 
-## ✅ Estado Actual
+## Revisión del código (2026-10-24)
+
+El análisis anterior no detectó un error real de visualización. Las fotos subidas desde el equipo se guardan como URI `data:image/...`, pero el renderizador las trataba como rutas locales (`icons/data:image/...`), lo que activaba el logo de respaldo. Además, una referencia no declarada a `formAgregarEstudiante` interrumpía la inicialización del panel antes de enlazar los controles de fotos.
+
+Se corrigieron ambos puntos en `frontend/js/resultados.js` y `frontend/js/votar.js`. El archivo `resultados.html` y `votar.html` también incrementan la versión de sus scripts para evitar reutilizar la versión anterior en caché. Las imágenes existentes guardadas en el servidor no se modifican.
+
+## Inventario y funcionamiento esperado
 
 ### 1. Fotos Existentes
-Las siguientes fotos están disponibles en `frontend/icons/candidatos/`:
+El inventario local incluye:
 - ✅ Voto-en-blanco.jpg (5.5 KB)
 - ✅ danilson.jpeg (95.6 KB)
 - ✅ dannia.jpeg (123.2 KB)
@@ -11,9 +17,9 @@ Las siguientes fotos están disponibles en `frontend/icons/candidatos/`:
 - ✅ felipe.jpeg (101.8 KB)
 - ✅ samara.jpeg (131.7 KB)
 
-### 2. Verificación en Producción
-- ✅ Las fotos son accesibles desde la URL de producción (HTTP 200)
-- ✅ Ruta probada: https://cusianadecide.programacionsena.online/icons/candidatos/danilson.jpeg
+### 2. Comprobación anterior de producción
+
+Una nota previa del proyecto reportó que una foto era accesible en producción. Ese dato no se volvió a comprobar durante esta revisión.
 
 ## 🔍 Cómo Funciona el Sistema
 
@@ -70,6 +76,7 @@ function resolverRutaImagen(imagen) {
   
   const valor = String(imagen).trim();
   if (!valor) return "icons/logo.ico";
+  if (/^data:image\//i.test(valor)) return valor;
   if (/^(https?:)?\/\//i.test(valor)) return valor; // URL completa
   
   const normalizada = valor.replace(/^\.\//, "").replace(/^frontend\//, "");
@@ -235,15 +242,6 @@ curl -s https://cusianadecide.programacionsena.online/api/candidatos | jq '.[] |
 "https://ejemplo.com/fotos/juan-perez.jpg"
 ```
 
-## ✅ Conclusión
+## Conclusión
 
-El sistema de carga de fotos está **funcionando correctamente**:
-
-✅ Carga desde archivo local (Base64)
-✅ Carga desde URL
-✅ Vista previa funcional
-✅ Fallback a logo institucional
-✅ Normalización automática de rutas
-✅ Fotos accesibles en producción
-
-**No se detectaron errores en el código actual.** Si experimentas problemas específicos, revisa las secciones de "Posibles Problemas" arriba y ejecuta las pruebas recomendadas.
+La vista previa aceptaba la URI Base64, pero las tarjetas de administración y votación no; por eso mostraban el logo de respaldo. El problema está corregido localmente. La publicación en producción y la prueba con una foto nueva aún están pendientes.

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "c1",
+    "nombre": "DANILSON DAVID VERA TORRES",
+    "lista": "03",
+    "cargo": "Personero estudiantil",
+    "propuesta": "Propuesta de Danilson",
+    "imagen": "icons/candidatos/danilson.jpeg",
+    "inspiracion": ""
+  },
+  {
+    "id": "c2",
+    "nombre": "ROMELY SAMARA FONSECA ROMERO",
+    "lista": "04",
+    "cargo": "Personero estudiantil",
+    "propuesta": "Propuesta de Samara",
+    "imagen": "icons/candidatos/samara.jpeg",
+    "inspiracion": ""
+  },
+  {
+    "id": "c3",
+    "nombre": "DANNIA BEATRIZ ROBLES PEREZ",
+    "lista": "05",
+    "cargo": "Personero estudiantil",
+    "propuesta": "Propuesta de Dannia",
+    "imagen": "icons/candidatos/dannia.jpeg",
+    "inspiracion": ""
+  },
+  {
+    "id": "c4",
+    "nombre": "DANIELA YARURO",
+    "lista": "6",
+    "cargo": "Personero estudiantil",
+    "propuesta": "Propuesta de Daniela",
+    "imagen": "icons/candidatos/dayana.jpeg",
+    "inspiracion": ""
+  },
+  {
+    "id": "c5",
+    "nombre": "QQQQ",
+    "lista": "7",
+    "cargo": "Personero estudiantil",
+    "propuesta": "Propuesta de Felipe",
+    "imagen": "icons/candidatos/felipe.jpeg",
+    "inspiracion": ""
+  },
+  {
+    "id": "voto-blanco",
+    "nombre": "VOTO EN BLANCO",
+    "lista": "",
+    "cargo": "Voto en blanco",
+    "propuesta": "",
+    "imagen": "icons/candidatos/Voto-en-blanco.jpg",
+    "inspiracion": ""
+  }
+]

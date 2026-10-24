@@ -2,12 +2,15 @@
 node_modules/
 package-lock.json
 
-# Datos sensibles y temporales
-backend/data/*.json
+# Datos sensibles y temporales (pero permitir archivos iniciales)
 backend/data/*.xlsx
 backend/data/*.xls
 backend/data/*.csv
+backend/data/~$*.xlsx
 !backend/data/.gitkeep
+!backend/data/candidatos.json
+!backend/data/votos.json
+!backend/data/estado-votaciones.json
 
 # Logs
 *.log

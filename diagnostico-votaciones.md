@@ -6,6 +6,8 @@ En `frontend/js/resultados.js` se consultaba `formAgregarEstudiante` antes de de
 
 Se corrigió declarando el formulario antes de usarlo. El botón de cierre ya estaba conectado al endpoint `POST /api/estado/cerrar`; no era necesario cambiar su lógica ni el estado en el backend.
 
+La verificación de producción mostró además que el endpoint sí cerraba las votaciones (HTTP 200 y `abierto: false`), pero el panel llamaba a `actualizarSelectorGrados`, función inexistente, y mostraba un error tras completar el cierre. Se eliminó esa llamada inválida; el estado visual se actualiza con `actualizarEstadoVotaciones(false)`.
+
 ## Verificación local
 
 - `node --check` pasa para `resultados.js` y `votar.js`.

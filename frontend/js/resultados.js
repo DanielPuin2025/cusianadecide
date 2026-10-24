@@ -277,7 +277,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (resp.ok && data.ok) {
           actualizarEstadoVotaciones(false);
-          actualizarSelectorGrados([]);
           alert(data.motivo || "Votaciones cerradas.");
         } else if (resp.status === 401 || resp.status === 403) {
           console.error("Token inválido o expirado");

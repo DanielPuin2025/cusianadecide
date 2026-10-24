@@ -14,12 +14,6 @@ RUN cd backend && npm install --production
 COPY backend ./backend
 COPY frontend ./frontend
 
-# Crear directorio de datos y copiar archivos iniciales
-RUN mkdir -p backend/data
-
-# Copiar archivos de datos iniciales (si existen)
-COPY backend/data/*.json backend/data/ 2>/dev/null || true
-
 # Declarar volumen para persistencia de datos
 VOLUME ["/app/backend/data"]
 

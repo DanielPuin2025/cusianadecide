@@ -178,8 +178,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       sedeActual = "__TODAS__";
       renderizarGrados("__TODAS__");
       // Marcar todos los grados si no hay filtro
-      const checkboxes = gradosContainer.querySelectorAll('input[type="checkbox"][value!="__TODOS_SEDE__"]');
-      checkboxes.forEach(cb => cb.checked = true);
+      const checkboxes = gradosContainer.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        if (cb.value !== "__TODOS_SEDE__") {
+          cb.checked = true;
+        }
+      });
     } else if (sedesPermitidas.length === 1) {
       // Una sola sede permitida
       const sedeUI = SEDE_MAP_INV[sedesPermitidas[0]] || sedesPermitidas[0];

@@ -2,9 +2,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formLogin");
   const mensaje = document.getElementById("mensajeLogin");
 
+  const pantalla = document.getElementById("pantallaBienvenida");
   document.getElementById("btnContinuar")?.addEventListener("click", () => {
-    document.getElementById("pantallaBienvenida")?.classList.remove("activo");
-    document.getElementById("pantallaAcceso")?.classList.add("activo");
+    pantalla?.classList.add("modo-acceso");
+    document.getElementById("codigo")?.focus();
+  });
+  document.getElementById("btnVolverBienvenida")?.addEventListener("click", () => {
+    pantalla?.classList.remove("modo-acceso");
+    if (mensaje) mensaje.textContent = "";
   });
 
   form?.addEventListener("submit", async (evento) => {

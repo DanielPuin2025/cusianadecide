@@ -107,6 +107,54 @@ body {
   display: flex;
 }
 
+.pantalla-bienvenida .vista-acceso {
+  display: none;
+}
+
+.pantalla-bienvenida.modo-acceso .vista-bienvenida {
+  display: none;
+}
+
+.pantalla-bienvenida.modo-acceso .vista-acceso {
+  display: block;
+}
+
+.pantalla-bienvenida.modo-acceso header.vista-acceso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pantalla-bienvenida .logo-institucional-acceso,
+.pantalla-bienvenida .logo-cusiana-acceso,
+.pantalla-bienvenida .logo-sena-acceso {
+  width: 84px;
+  height: 84px;
+}
+
+.pantalla-bienvenida .tarjeta-acceso {
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  background: transparent;
+  width: 100%;
+}
+
+.pantalla-bienvenida.modo-acceso .hero-card {
+  padding-bottom: 72px;
+}
+
+.pantalla-bienvenida .tarjeta-acceso .boton.boton-volver {
+  background: transparent;
+  color: var(--texto-secundario);
+  box-shadow: none;
+  border: 1px solid var(--bordes);
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  margin-top: 8px;
+}
+
 .pantalla-bienvenida::before {
   content: "";
   position: absolute;

@@ -513,8 +513,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function obtenerGradosSeleccionados() {
     if (!gradosContainer) return [];
-    const checkboxes = gradosContainer.querySelectorAll('input[type="checkbox"][value!="__TODOS_SEDE__"]:checked');
-    return Array.from(checkboxes).map(cb => cb.value);
+    const checkboxes = gradosContainer.querySelectorAll('input[type="checkbox"]:checked');
+    return Array.from(checkboxes)
+      .filter(cb => cb.value !== "__TODOS_SEDE__")
+      .map(cb => cb.value);
   }
 
   function obtenerSedesSeleccionadas() {

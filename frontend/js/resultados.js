@@ -629,15 +629,24 @@ function mostrarVistaPrevia(origen) {
   const imagen = document.getElementById("previewImagenCandidato");
   const texto = document.getElementById("sinPreviewImagen");
   if (!imagen || !texto) return;
-  if (!origen) {
+  if (!origen || origen.trim() === "") {
     imagen.hidden = true;
+    imagen.src = "";
     imagen.removeAttribute("src");
     texto.hidden = false;
     return;
   }
   imagen.src = origen;
-  imagen.hidden = false;
-  texto.hidden = true;
+  imagen.onerror = function() {
+    console.warn("Error al cargar imagen:", origen);
+    imagen.hidden = true;
+    imagen.src = "";
+    texto.hidden = false;
+  };
+  imagen.onload = function() {
+    imagen.hidden = false;
+    texto.hidden = true;
+  };
 }
 
 function cargarFotoDesdeEquipo(evento) {

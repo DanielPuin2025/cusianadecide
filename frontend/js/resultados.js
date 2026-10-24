@@ -255,26 +255,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     botonCerrarVotaciones.addEventListener("click", async () => {
       if (!confirm("¿Seguro que quieres cerrar las votaciones? Los estudiantes no podrán votar.")) return;
       try {
+        console.log("=== Cerrando votaciones ===");
+        const headers = await encabezadosAdmin();
+        console.log("Headers:", headers);
+
         const resp = await fetch("/api/estado/cerrar", {
           method: "POST",
-          headers: await encabezadosAdmin(),
+          headers: headers,
         });
+
+        console.log("Status HTTP:", resp.status);
+
         const data = await resp.json().catch(() => ({}));
+        console.log("Respuesta del servidor:", data);
+
         if (resp.ok && data.ok) {
           actualizarEstadoVotaciones(false);
           actualizarSelectorGrados([]);
           alert(data.motivo || "Votaciones cerradas.");
         } else if (resp.status === 401 || resp.status === 403) {
+          console.error("Token inválido o expirado");
           alert("Sesión de administrador inválida o expirada. Vuelve a ingresar desde la pantalla de inicio.");
           await eliminarDeStore("sesion", "actual");
           window.location.href = "index.html";
         } else {
           const motivo = data.motivo || data.mensaje || resp.statusText || "No se pudo cerrar las votaciones.";
+          console.error("Error del servidor:", motivo);
           alert("No se pudo cerrar las votaciones.\nMotivo: " + motivo);
         }
       } catch (e) {
         console.error("Error al cerrar las votaciones:", e);
-        alert("Error al cerrar las votaciones.");
+        console.error("Stack trace:", e.stack);
+        alert("Error al cerrar las votaciones. Revisa la consola del navegador (F12) para más detalles.");
       }
     });
   }
@@ -285,12 +297,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         const grados = obtenerGradosSeleccionados();
         const sedes = obtenerSedesSeleccionadas();
+
+        console.log("=== Abriendo votaciones ===");
+        console.log("Grados seleccionados:", grados);
+        console.log("Sedes seleccionadas:", sedes);
+
+        const headers = await encabezadosAdmin(true);
+        console.log("Headers:", headers);
+
         const resp = await fetch("/api/estado/abrir", {
           method: "POST",
-          headers: await encabezadosAdmin(true),
+          headers: headers,
           body: JSON.stringify({ grados, sedes }),
         });
+
+        console.log("Status HTTP:", resp.status);
+
         const data = await resp.json().catch(() => ({}));
+        console.log("Respuesta del servidor:", data);
+
         if (resp.ok && data.ok) {
           actualizarEstadoVotaciones(true);
           actualizarConfigDesdeEstado(data.gradosPermitidos || [], data.sedesPermitidas || []);
@@ -299,16 +324,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (sedes.length) msg += ` Sedes: ${sedes.join(", ")}.`;
           alert(msg);
         } else if (resp.status === 401 || resp.status === 403) {
+          console.error("Token inválido o expirado");
           alert("Sesión de administrador inválida o expirada. Vuelve a ingresar desde la pantalla de inicio.");
           await eliminarDeStore("sesion", "actual");
           window.location.href = "index.html";
         } else {
           const motivo = data.motivo || data.mensaje || resp.statusText || "No se pudo abrir las votaciones.";
+          console.error("Error del servidor:", motivo);
           alert("No se pudo abrir las votaciones.\nMotivo: " + motivo);
         }
       } catch (e) {
         console.error("Error al abrir las votaciones:", e);
-        alert("Error al abrir las votaciones.");
+        console.error("Stack trace:", e.stack);
+        alert("Error al abrir las votaciones. Revisa la consola del navegador (F12) para más detalles.");
       }
     });
   }
@@ -659,8 +687,13 @@ function cargarFotoDesdeEquipo(evento) {
   }
   const lector = new FileReader();
   lector.addEventListener("load", () => {
-    document.getElementById("imagenCandidato").value = lector.result;
-    mostrarVistaPrevia(lector.result);
+    const imagenBase64 = lector.result;
+    const inputImagen = document.getElementById("imagenCandidato");
+    if (inputImagen) {
+      inputImagen.value = imagenBase64;
+      console.log("Foto cargada correctamente. Tamaño Base64:", imagenBase64.length, "caracteres");
+    }
+    mostrarVistaPrevia(imagenBase64);
   });
   lector.readAsDataURL(archivo);
 }
@@ -756,12 +789,18 @@ async function guardarCandidato(evento) {
   const id = document.getElementById("candidatoId").value;
   const nombre = document.getElementById("nombreCandidato").value.trim();
   const esVotoEnBlanco = nombre.toLowerCase() === "voto en blanco";
+  const imagenValor = document.getElementById("imagenCandidato").value.trim();
+
+  console.log("=== Guardando candidato ===");
+  console.log("Nombre:", nombre);
+  console.log("Imagen valor:", imagenValor ? `${imagenValor.substring(0, 50)}... (${imagenValor.length} caracteres)` : "VACÍO");
+
   const payload = {
     nombre,
     lista: esVotoEnBlanco ? "" : document.getElementById("listaCandidato").value.trim(),
     cargo: document.getElementById("cargoCandidato").value.trim(),
     propuesta: document.getElementById("propuestaCandidato").value.trim(),
-    imagen: document.getElementById("imagenCandidato").value.trim(),
+    imagen: imagenValor,
     inspiracion: document.getElementById("inspiracionCandidato").value.trim(),
   };
 
@@ -769,17 +808,21 @@ async function guardarCandidato(evento) {
   const url = id ? `/api/candidatos/${id}` : "/api/candidatos";
 
   try {
+    console.log("Enviando a:", url, "Método:", metodo);
     const respuesta = await fetch(url, {
       method: metodo,
       headers: await encabezadosAdmin(true),
       body: JSON.stringify(payload),
     });
     const datos = await respuesta.json().catch(() => ({}));
+    console.log("Respuesta del servidor:", datos);
+
     if (!respuesta.ok) throw new Error(datos.motivo || "No se pudo guardar el candidato");
     limpiarFormularioCandidato();
     await Promise.all([cargarCandidatosAdmin(), cargarResultados()]);
     mostrarMensaje(id ? "Candidato actualizado correctamente." : "Candidato agregado correctamente.");
   } catch (error) {
+    console.error("Error al guardar candidato:", error);
     mostrarMensaje(error.message || "No se pudo guardar el candidato", "error");
   }
 }
